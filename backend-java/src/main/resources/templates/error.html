@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Błąd')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container"><section class="card"><div class="card-header"><h1 class="card-title" th:text="${title ?: 'Nie udało się otworzyć strony'}"></h1></div><div class="card-body stack"><p class="muted" th:text="${message ?: 'Wystąpił nieoczekiwany błąd.'}"></p><a class="btn" th:href="@{/}">Wróć na stronę główną</a></div></section></div></main>
+</body></html>

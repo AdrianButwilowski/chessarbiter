@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Zarejestruj się')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main>
+    <form method="post" th:action="@{/api/auth/register}">
+        <input type="email" name="email" placeholder="Email">
+        <input type="text" name="name" placeholder="Imię i nazwisko">
+        <input type="password" name="password" placeholder="Hasło">
+        <input type="password" name="confirmPassword" placeholder="Powtórz hasło">
+        <button type="submit">Zarejestruj</button>
+    </form>
+</main>
+</body>
+</html>
