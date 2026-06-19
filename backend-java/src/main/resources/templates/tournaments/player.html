@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Zawodnik')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow" th:text="${tournament.title}"></p><h1 th:text="${player.firstName + ' ' + player.lastName}"></h1></header>
+  <nav th:replace="~{fragments/layout :: public-nav(${tournament}, 'players')}"></nav>
+  <div class="grid grid-2">
+    <section class="card"><div class="card-header"><h2 class="card-title">Dane zawodnika</h2></div><div class="card-body info-grid">
+      <div class="info"><span class="info-label">Klub / miasto</span><strong th:text="${player.clubOrCity}"></strong></div>
+      <div class="info"><span class="info-label">Ranking</span><strong th:text="${player.rating}"></strong></div>
+      <div class="info"><span class="info-label">Kategoria</span><strong th:text="${@view.category(player.chessCategory)}"></strong></div>
+      <div class="info"><span class="info-label">Punkty</span><strong th:text="${@view.points(player.points)}"></strong></div>
+      <div class="info"><span class="info-label">Miejsce</span><strong th:text="${player.rank ?: 'Brak'}"></strong></div>
+      <div class="info"><span class="info-label">Status</span><strong th:text="${@view.registrationStatus(player.status)}"></strong></div>
+    </div></section>
+    <section class="card"><div class="card-header"><h2 class="card-title">Partie</h2></div><div class="card-body">
+      <div class="stack" th:if="${!#lists.isEmpty(player.games)}"><a class="card card-body cluster space-between" th:each="game : ${player.games}" th:href="@{/turnieje/{slug}/rundy/{number}(slug=${tournament.slug},number=${game.roundNumber})}"><span th:text="${'Runda ' + game.roundNumber + ' · ' + game.opponentName}"></span><strong th:text="${game.outcome()}"></strong></a></div>
+      <div class="empty" th:if="${#lists.isEmpty(player.games)}">Brak rozegranych partii.</div>
+    </div></section>
+  </div>
+</div></main>
+</body></html>

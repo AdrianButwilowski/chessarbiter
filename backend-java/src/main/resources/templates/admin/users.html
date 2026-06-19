@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Użytkownicy')}"></head>
+<body><header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container"><header class="page-header"><p class="eyebrow">Panel administratora</p><h1>Użytkownicy</h1></header><div th:replace="~{fragments/layout :: messages}"></div>
+  <div class="table-wrap"><table><thead><tr><th>Nazwa</th><th>E-mail</th><th>Rola</th><th>Utworzono</th><th>Akcje</th></tr></thead><tbody><tr th:each="user : ${users}"><td th:text="${user.name ?: 'Brak nazwy'}"></td><td th:text="${user.email}"></td><td th:text="${user.role}"></td><td th:text="${@view.dateTime(user.createdAt)}"></td><td class="actions-cell"><div class="cluster user-actions" th:if="${user.role.name() != 'ADMIN'}"><form class="user-role-form" method="post" th:action="@{/panel-admina/uzytkownicy/{id}/rola(id=${user.id})}"><select name="role"><option value="PLAYER">Zawodnik</option><option value="ARBITER">Sędzia</option></select><button class="btn btn-small" type="submit">Zmień</button></form><form class="user-delete-form" method="post" th:action="@{/panel-admina/uzytkownicy/{id}/usun(id=${user.id})}" data-confirm="Usunąć użytkownika?"><button class="btn btn-small btn-danger" type="submit">Usuń</button></form></div></td></tr></tbody></table></div>
+</div></main></body></html>

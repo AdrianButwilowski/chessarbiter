@@ -1,56 +1,73 @@
 package pl.chessarbiter.service;
 
+import java.util.Locale;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.chessarbiter.dto.auth.*;
+import org.springframework.transaction.annotation.Transactional;
+import pl.chessarbiter.dto.auth.LoginRequest;
+import pl.chessarbiter.dto.auth.RegisterRequest;
 import pl.chessarbiter.entity.User;
 import pl.chessarbiter.entity.UserRole;
 import pl.chessarbiter.exception.BadRequestException;
 import pl.chessarbiter.exception.ConflictException;
 import pl.chessarbiter.exception.UnauthorizedException;
 import pl.chessarbiter.repository.UserRepository;
-import pl.chessarbiter.security.JwtService;
-
-import java.time.Instant;
-import java.util.UUID;
+import pl.chessarbiter.security.SecurityUser;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
 
-    public AuthResponse register(RegisterRequest request) {
+    @Transactional
+    public User register(RegisterRequest request) {
+        String email = normalizeEmail(request.email());
         if (!request.password().equals(request.confirmPassword())) {
-            throw new BadRequestException("Passwords do not match");
+            throw new BadRequestException("Passwords must match.");
         }
-        if (userRepository.existsByEmailIgnoreCase(request.email())) {
-            throw new ConflictException("Email already registered");
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new ConflictException("Account with this email already exists.");
         }
-        User user = User.builder()
-                .id(UUID.randomUUID().toString())
-                .email(request.email())
-                .name(request.name())
-                .passwordHash(passwordEncoder.encode(request.password()))
-                .role(UserRole.PLAYER)
-                .createdAt(Instant.now())
-                .build();
-        user = userRepository.save(user);
-        return new AuthResponse(UserResponse.from(user));
+
+        User user = new User();
+        user.setEmail(email);
+        user.setName(blankToNull(request.name()));
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
+        user.setRole(UserRole.PLAYER);
+        return userRepository.save(user);
     }
 
-    public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailIgnoreCase(request.email())
-                .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
+    @Transactional(readOnly = true)
+    public User login(LoginRequest request) {
+        String email = normalizeEmail(request.email());
+        User user = userRepository.findByEmailIgnoreCase(email)
+            .filter(candidate -> candidate.getDeletedAt() == null)
+            .orElseThrow(() -> new UnauthorizedException("Invalid email or password."));
+
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw new UnauthorizedException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password.");
         }
-        return new AuthResponse(UserResponse.from(user));
+
+        return user;
     }
 
-    public String generateToken(User user) {
-        return jwtService.generateToken(user.getId(), user.getRole().name());
+    @Transactional(readOnly = true)
+    public User currentUser(SecurityUser securityUser) {
+        return userRepository.findByIdAndDeletedAtIsNull(securityUser.getId())
+            .orElseThrow(() -> new UnauthorizedException("Authentication is required."));
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String blankToNull(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return value.trim();
     }
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="standings(standings, playerBase)">
+  <div class="empty" th:if="${#lists.isEmpty(standings)}">Tabela nie została jeszcze utworzona.</div>
+  <div class="table-wrap" th:unless="${#lists.isEmpty(standings)}">
+    <table>
+      <thead>
+      <tr>
+        <th>Miejsce</th><th>Zawodnik</th><th>Klub / miasto</th><th>Ranking</th><th>Kategoria</th>
+        <th>Punkty</th><th>Buchholz</th><th>Median Buchholz</th><th>Sonneborn-Berger</th><th>Progres</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="standing : ${standings}">
+        <td th:text="${standing.rank}"></td>
+        <td>
+          <a class="link"
+             th:if="${playerBase != null}"
+             th:href="${playerBase + '/' + standing.registration.id}"
+             th:text="${standing.registration.firstName + ' ' + standing.registration.lastName}"></a>
+          <span th:if="${playerBase == null}" th:text="${standing.registration.firstName + ' ' + standing.registration.lastName}"></span>
+        </td>
+        <td th:text="${standing.registration.clubOrCity}"></td>
+        <td th:text="${standing.registration.rating}"></td>
+        <td th:text="${@view.category(standing.registration.chessCategory)}"></td>
+        <td th:text="${@view.points(standing.points)}"></td>
+        <td th:text="${@view.points(standing.buchholz)}"></td>
+        <td th:text="${@view.points(standing.medianBuchholz)}"></td>
+        <td th:text="${@view.points(standing.sonnebornBerger)}"></td>
+        <td th:text="${@view.points(standing.progressiveScore)}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>

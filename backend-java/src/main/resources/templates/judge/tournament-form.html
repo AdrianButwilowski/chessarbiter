@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${editing ? 'Edycja turnieju' : 'Nowy turniej'})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Panel sędziego</p><h1 th:text="${editing ? 'Edycja turnieju' : 'Nowy turniej'}"></h1><p class="lead">Dane są zapisywane bezpośrednio przez Spring MVC.</p></header>
+  <th:block th:if="${editing}">
+    <nav th:replace="~{fragments/layout :: management-nav(${tournament}, 'edit')}"></nav>
+  </th:block>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <section class="card"><div class="card-body">
+    <form class="form-grid" method="post" th:action="${editing} ? @{/panel-sedziego/turnieje/{id}/edytuj(id=${tournament.id})} : (${adminMode} ? @{/panel-admina/turnieje/nowy} : @{/panel-sedziego/turnieje/nowy})" th:object="${tournamentForm}">
+      <div class="alert alert-error form-error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+      <div class="field"><label for="title">Nazwa turnieju</label><input id="title" th:field="*{title}"><span class="field-error" th:errors="*{title}"></span></div>
+      <div class="field"><label for="city">Miasto</label><input id="city" th:field="*{city}"><span class="field-error" th:errors="*{city}"></span></div>
+      <div class="field"><label for="location">Miejsce</label><input id="location" th:field="*{location}"><span class="field-error" th:errors="*{location}"></span></div>
+      <div class="field"><label for="organizer">Organizator</label><input id="organizer" th:field="*{organizer}"><span class="field-error" th:errors="*{organizer}"></span></div>
+      <div class="field"><label for="contactEmail">E-mail kontaktowy</label><input id="contactEmail" type="email" th:field="*{contactEmail}"><span class="field-error" th:errors="*{contactEmail}"></span></div>
+      <div class="field"><label for="contactPhone">Telefon</label><input id="contactPhone" th:field="*{contactPhone}"></div>
+      <div class="field"><label for="startDate">Data rozpoczęcia</label><input id="startDate" type="datetime-local" th:field="*{startDate}"><span class="field-error" th:errors="*{startDate}"></span></div>
+      <div class="field"><label for="endDate">Data zakończenia</label><input id="endDate" type="datetime-local" th:field="*{endDate}"></div>
+      <div class="field"><label for="registrationDeadline">Termin zapisów</label><input id="registrationDeadline" type="datetime-local" th:field="*{registrationDeadline}"></div>
+      <div class="field"><label for="rounds">Liczba rund</label><input id="rounds" type="number" th:field="*{rounds}"></div>
+      <div class="field"><label for="maxPlayers">Limit miejsc</label><input id="maxPlayers" type="number" th:field="*{maxPlayers}"></div>
+      <div class="field"><label for="entryFee">Wpisowe</label><input id="entryFee" th:field="*{entryFee}"></div>
+      <div class="field"><label for="tournamentType">System</label><select id="tournamentType" th:field="*{tournamentType}"><option th:each="type : ${tournamentTypes}" th:value="${type}" th:text="${@view.tournamentType(type)}"></option></select></div>
+      <div class="field"><label for="timeControlType">Rodzaj tempa</label><select id="timeControlType" th:field="*{timeControlType}"><option th:each="type : ${timeControlTypes}" th:value="${type}" th:text="${@view.timeControl(type)}"></option></select></div>
+      <div class="field"><label for="timeControlDescription">Tempo gry</label><input id="timeControlDescription" th:field="*{timeControlDescription}"><span class="field-error" th:errors="*{timeControlDescription}"></span></div>
+      <div class="field"><label for="regulationsUrl">Regulamin URL</label><input id="regulationsUrl" th:field="*{regulationsUrl}"></div>
+      <div class="field field-full"><label for="description">Opis</label><textarea id="description" th:field="*{description}"></textarea><span class="field-error" th:errors="*{description}"></span></div>
+      <div class="field" th:if="${editing}"><label for="status">Status roboczy</label><select id="status" th:field="*{status}"><option th:each="status : ${tournamentStatuses}" th:value="${status}" th:text="${@view.tournamentStatus(status)}"></option></select></div>
+      <div class="field field-full cluster">
+        <label class="checkbox"><input type="checkbox" th:field="*{registrationOpen}"> Zapisy otwarte</label>
+        <label class="checkbox"><input type="checkbox" th:field="*{allowPlayerCancellation}"> Zawodnik może anulować</label>
+        <label class="checkbox"><input type="checkbox" th:field="*{showRegisteredPlayers}"> Pokaż listę zgłoszeń</label>
+      </div>
+      <div class="field-full cluster">
+        <button class="btn" type="submit" name="intent" value="save">Zapisz</button>
+        <button class="btn btn-accent" th:unless="${editing}" type="submit" name="intent" value="publish">Opublikuj</button>
+      </div>
+    </form>
+  </div></section>
+</div></main>
+</body></html>

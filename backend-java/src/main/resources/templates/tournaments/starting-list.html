@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Lista startowa')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Turniej</p><h1 th:text="${'Lista startowa: ' + tournament.title}"></h1></header>
+  <nav th:replace="~{fragments/layout :: public-nav(${tournament}, 'players')}"></nav>
+  <div class="table-wrap" th:if="${!#lists.isEmpty(registrations)}"><table>
+    <thead><tr><th>Nr</th><th>Zawodnik</th><th>Klub / miasto</th><th>Ranking</th><th>Kategoria</th><th>Status</th></tr></thead>
+    <tbody><tr th:each="registration, iteration : ${registrations}">
+      <td th:text="${registration.startNumber ?: iteration.count}"></td>
+      <td><a class="link" th:href="@{/turnieje/{slug}/zawodnicy/{id}(slug=${tournament.slug},id=${registration.id})}" th:text="${registration.firstName + ' ' + registration.lastName}"></a></td>
+      <td th:text="${registration.clubOrCity}"></td><td th:text="${registration.rating}"></td><td th:text="${@view.category(registration.chessCategory)}"></td>
+      <td><span class="badge" th:text="${@view.registrationStatus(registration.status)}"></span></td>
+    </tr></tbody>
+  </table></div>
+  <div class="empty" th:if="${#lists.isEmpty(registrations)}">Brak zawodników na liście startowej.</div>
+</div></main>
+</body></html>

@@ -1,3 +1,7 @@
 package pl.chessarbiter.entity;
 
-public enum UserRole { ADMIN, ARBITER, PLAYER }
+public enum UserRole {
+    ADMIN,
+    ARBITER,
+    PLAYER
+}

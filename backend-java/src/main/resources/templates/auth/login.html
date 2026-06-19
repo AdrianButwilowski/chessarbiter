@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Logowanie')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="auth-page">
+  <section class="card auth-card">
+    <div class="card-header"><h1 class="card-title">Logowanie</h1><p class="card-subtitle">Zaloguj się do panelu turniejowego.</p></div>
+    <div class="card-body">
+      <form class="stack" method="post" th:action="@{/logowanie}" th:object="${loginForm}">
+        <div class="alert alert-error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+        <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" th:field="*{email}"><span class="field-error" th:errors="*{email}"></span></div>
+        <div class="field"><label for="password">Hasło</label><input id="password" type="password" autocomplete="current-password" th:field="*{password}"><span class="field-error" th:errors="*{password}"></span></div>
+        <button class="btn" type="submit">Zaloguj</button>
+      </form>
+      <p class="text-center muted mt-2">Nie masz konta? <a class="link" th:href="@{/rejestracja}">Zarejestruj się</a></p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

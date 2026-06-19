@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Wyniki turnieju')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Panel sędziego</p><h1 th:text="${'Wyniki: ' + tournament.title}"></h1></header>
+  <nav th:replace="~{fragments/layout :: management-nav(${tournament}, 'results')}"></nav>
+  <div class="cluster mb-2"><a class="btn" th:href="@{/panel-sedziego/turnieje/{id}/wyniki.csv(id=${tournament.id})}">Eksport tabeli CSV</a></div>
+  <section class="card mb-2"><div class="card-header"><h2 class="card-title">Tabela</h2></div><div class="card-body" th:replace="~{fragments/tables :: standings(${standings}, ${'/turnieje/' + tournament.slug + '/zawodnicy'})}"></div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">Rundy</h2></div><div class="card-body cluster"><a class="btn btn-outline btn-small" th:each="round : ${rounds}" th:href="@{/panel-sedziego/turnieje/{id}/rundy/{number}(id=${tournament.id},number=${round.roundNumber})}" th:text="${'Runda ' + round.roundNumber}"></a></div></section>
+</div></main>
+</body></html>

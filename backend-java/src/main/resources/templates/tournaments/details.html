@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${tournament.title})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page">
+  <div class="container">
+    <header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1 th:text="${tournament.title}"></h1><p class="lead" th:text="${tournament.description}"></p></header>
+    <nav th:replace="~{fragments/layout :: public-nav(${tournament}, 'info')}"></nav>
+    <div th:replace="~{fragments/layout :: messages}"></div>
+    <div class="layout-sidebar">
+      <div class="stack">
+        <section class="card">
+          <div class="card-header"><h2 class="card-title">Informacje o turnieju</h2></div>
+          <div class="card-body info-grid">
+            <div class="info"><span class="info-label">Miejsce</span><strong th:text="${tournament.city + ', ' + tournament.location}"></strong></div>
+            <div class="info"><span class="info-label">Data</span><strong th:text="${@view.dateRange(tournament.startDate, tournament.endDate)}"></strong></div>
+            <div class="info"><span class="info-label">System</span><strong th:text="${@view.tournamentType(tournament.tournamentType)}"></strong></div>
+            <div class="info"><span class="info-label">Tempo</span><strong th:text="${@view.timeControl(tournament.timeControlType) + ' · ' + tournament.timeControlDescription}"></strong></div>
+            <div class="info"><span class="info-label">Liczba rund</span><strong th:text="${tournament.rounds}"></strong></div>
+            <div class="info"><span class="info-label">Status</span><strong th:text="${@view.displayStatus(tournament.displayStatus)}"></strong></div>
+            <div class="info"><span class="info-label">Wpisowe</span><strong th:text="${tournament.entryFee ?: 'Brak informacji'}"></strong></div>
+            <div class="info"><span class="info-label">Organizator</span><strong th:text="${tournament.organizer}"></strong></div>
+            <div class="info"><span class="info-label">Kontakt e-mail</span><strong th:text="${tournament.contactEmail}"></strong></div>
+            <div class="info"><span class="info-label">Telefon</span><strong th:text="${tournament.contactPhone ?: 'Brak'}"></strong></div>
+          </div>
+        </section>
+        <div class="cluster">
+          <a class="btn btn-outline" th:if="${tournament.regulationsUrl}" th:href="${tournament.regulationsUrl}">Regulamin</a>
+          <a class="btn btn-outline" th:if="${isManager}" th:href="@{/panel-sedziego/turnieje/{id}/zgloszenia(id=${tournament.id})}">Zarządzaj turniejem</a>
+        </div>
+        <section class="card" id="zapisy" th:if="${registrationOpen and !ownRegistration}">
+          <div class="card-header"><h2 class="card-title">Zapisz się</h2><p class="card-subtitle">Formularz działa bez JavaScriptu. Błędy są sprawdzane po stronie serwera.</p></div>
+          <div class="card-body">
+            <form class="form-grid" method="post" th:action="@{/turnieje/{slug}/zgloszenie(slug=${tournament.slug})}" th:object="${registrationForm}">
+              <div class="alert alert-error form-error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+              <div class="field"><label for="firstName">Imię</label><input id="firstName" th:field="*{firstName}"><span class="field-error" th:errors="*{firstName}"></span></div>
+              <div class="field"><label for="lastName">Nazwisko</label><input id="lastName" th:field="*{lastName}"><span class="field-error" th:errors="*{lastName}"></span></div>
+              <div class="field"><label for="email">E-mail</label><input id="email" type="email" th:field="*{email}"><span class="field-error" th:errors="*{email}"></span></div>
+              <div class="field"><label for="clubOrCity">Klub lub miasto</label><input id="clubOrCity" th:field="*{clubOrCity}"><span class="field-error" th:errors="*{clubOrCity}"></span></div>
+              <div class="field"><label for="federation">Federacja</label><input id="federation" th:field="*{federation}"><span class="field-error" th:errors="*{federation}"></span></div>
+              <div class="field"><label for="rating">Ranking</label><input id="rating" type="number" th:field="*{rating}"><span class="field-error" th:errors="*{rating}"></span></div>
+              <div class="field"><label for="chessCategory">Kategoria szachowa</label><input id="chessCategory" placeholder="np. III, II, I, K, FM" th:field="*{chessCategory}"><span class="field-error" th:errors="*{chessCategory}"></span></div>
+              <div class="field"><label for="phoneNumber">Telefon</label><input id="phoneNumber" th:field="*{phoneNumber}"><span class="field-error" th:errors="*{phoneNumber}"></span></div>
+              <div class="field"><label for="birthYear">Rok urodzenia</label><input id="birthYear" type="number" th:field="*{birthYear}"><span class="field-error" th:errors="*{birthYear}"></span></div>
+              <div class="field field-full"><label for="notes">Uwagi</label><textarea id="notes" th:field="*{notes}"></textarea><span class="field-error" th:errors="*{notes}"></span></div>
+              <div class="field-full"><button class="btn" type="submit">Wyślij zgłoszenie</button></div>
+            </form>
+          </div>
+        </section>
+      </div>
+      <aside class="stack">
+        <section class="card">
+          <div class="card-header"><h2 class="card-title">Status zapisów</h2></div>
+          <div class="card-body stack">
+            <span class="badge badge-success" th:if="${registrationOpen}">Zapisy otwarte</span>
+            <span class="badge badge-muted" th:unless="${registrationOpen}">Zapisy zamknięte</span>
+            <p class="muted" th:if="${tournament.registrationDeadline}" th:text="${'Termin: ' + @view.dateTime(tournament.registrationDeadline)}"></p>
+            <div class="alert alert-success" th:if="${ownRegistration}">Jesteś już zgłoszony do tego turnieju.</div>
+            <a class="btn" th:if="${registrationOpen and !ownRegistration}" href="#zapisy">Zapisz się</a>
+          </div>
+        </section>
+        <section class="card" th:if="${currentUser == null}">
+          <div class="card-body stack"><p class="muted">Zaloguj się, aby dane profilu automatycznie uzupełniały formularze.</p><a class="btn btn-outline" th:href="@{/logowanie}">Zaloguj się</a></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</main>
+</body>
+</html>

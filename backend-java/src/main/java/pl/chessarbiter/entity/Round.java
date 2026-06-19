@@ -1,24 +1,42 @@
 package pl.chessarbiter.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
+@Getter
+@Setter
 @Entity
+@NoArgsConstructor
 @Table(name = "\"Round\"")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-public class Round {
-    @Id
-    private String id;
+public class Round extends AbstractTimestampedEntity {
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tournament_id")
+    @JoinColumn(name = "\"tournamentId\"", nullable = false)
     private Tournament tournament;
+
+    @Column(name = "\"roundNumber\"", nullable = false)
     private Integer roundNumber;
+
     @Enumerated(EnumType.STRING)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    @Column(name = "\"status\"", nullable = false, columnDefinition = "\"RoundStatus\"")
     private RoundStatus status = RoundStatus.NOT_STARTED;
 
-    @OneToMany(mappedBy = "round", cascade = CascadeType.ALL)
-    @Builder.Default
+    @OneToMany(mappedBy = "round", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Game> games = new ArrayList<>();
 }

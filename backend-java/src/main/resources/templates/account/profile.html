@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Mój profil')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1>Mój profil</h1><p class="lead">Uzupełnij dane zawodnika, aby były gotowe do zgłoszeń turniejowych.</p></header>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <section class="card"><div class="card-body">
+    <form class="form-grid" method="post" th:action="@{/profil}" th:object="${profileForm}">
+      <div class="field"><label for="firstName">Imię</label><input id="firstName" th:field="*{firstName}"><span class="field-error" th:errors="*{firstName}"></span></div>
+      <div class="field"><label for="lastName">Nazwisko</label><input id="lastName" th:field="*{lastName}"><span class="field-error" th:errors="*{lastName}"></span></div>
+      <div class="field"><label for="email">E-mail</label><input id="email" type="email" th:field="*{email}"><span class="field-error" th:errors="*{email}"></span></div>
+      <div class="field"><label for="clubOrCity">Klub lub miasto</label><input id="clubOrCity" th:field="*{clubOrCity}"><span class="field-error" th:errors="*{clubOrCity}"></span></div>
+      <div class="field"><label for="federation">Federacja</label><input id="federation" th:field="*{federation}"></div>
+      <div class="field"><label for="chessCategory">Kategoria szachowa</label><input id="chessCategory" th:field="*{chessCategory}"></div>
+      <div class="field"><label for="classicalRating">Ranking klasyczny</label><input id="classicalRating" type="number" th:field="*{classicalRating}"></div>
+      <div class="field"><label for="rapidRating">Ranking szybki</label><input id="rapidRating" type="number" th:field="*{rapidRating}"></div>
+      <div class="field"><label for="blitzRating">Ranking błyskawiczny</label><input id="blitzRating" type="number" th:field="*{blitzRating}"></div>
+      <div class="field"><label for="birthYear">Rok urodzenia</label><input id="birthYear" type="number" th:field="*{birthYear}"></div>
+      <div class="field"><label for="phoneNumber">Telefon</label><input id="phoneNumber" th:field="*{phoneNumber}"></div>
+      <div class="field field-full"><button class="btn" type="submit">Zapisz profil</button></div>
+    </form>
+  </div></section>
+</div></main>
+</body></html>

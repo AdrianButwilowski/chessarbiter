@@ -1,0 +1,31 @@
+# Java build
+target/
+backend-java/target/
+*.log
+
+# Local environment and IDE
+.env
+.env.local
+.idea/
+.vscode/
+*.iml
+
+# Tests
+src/test/
+backend-java/src/test/
+**/src/test/
+test/
+tests/
+**/test/
+**/tests/
+
+# Legacy frontend build artifacts
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+.next-dev.err.log
+.next-dev.out.log
+docs/
+Readme.md

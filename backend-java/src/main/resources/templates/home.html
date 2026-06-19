@@ -1,8 +1,51 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('ChessArbiter')}"></head>
+<head th:replace="~{fragments/layout :: head('Strona główna')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: header}"></header>
-<main><h1>Witaj w ChessArbiter</h1></main>
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow" style="color:#fcd34d">Polskie turnieje szachowe</p>
+        <h1>ChessArbiter Polska</h1>
+        <p class="lead">Platforma do publikacji turniejów, zgłoszeń zawodników oraz pracy sędziów.</p>
+        <div class="cluster mt-2">
+          <a class="btn btn-accent" th:href="@{/turnieje}">Zobacz turnieje</a>
+          <a class="btn btn-outline" th:href="@{/rejestracja}">Utwórz konto</a>
+          <a class="btn btn-outline" th:href="@{/logowanie}">Zaloguj się</a>
+        </div>
+      </div>
+      <div class="feature-list">
+        <div class="feature"><strong>Zawodnicy</strong><span>Publiczne zapisy, profil gracza i historia zgłoszeń.</span></div>
+        <div class="feature"><strong>Sędziowie</strong><span>Tworzenie turniejów, rund, kojarzeń i wyników.</span></div>
+        <div class="feature"><strong>Turnieje</strong><span>Szybkie filtrowanie wydarzeń według miasta, systemu i tempa gry.</span></div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <div><p class="eyebrow">Najbliższe wydarzenia</p><h2>Najnowsze turnieje</h2></div>
+        <a class="btn btn-outline" th:href="@{/turnieje}">Wszystkie turnieje</a>
+      </div>
+      <div class="stack" th:if="${!#lists.isEmpty(tournaments)}">
+        <article class="card" th:each="tournament : ${tournaments}">
+          <div class="card-body">
+            <div class="cluster space-between">
+              <div><h3 class="card-title" th:text="${tournament.title}"></h3><p class="muted" th:text="${tournament.city + ', ' + tournament.location}"></p></div>
+              <div class="cluster"><span class="badge" th:text="${@view.displayStatus(tournament.displayStatus)}"></span><span class="badge badge-success" th:if="${tournament.registrationOpen}">Zapisy otwarte</span><span class="badge badge-muted" th:unless="${tournament.registrationOpen}">Zapisy zamknięte</span></div>
+            </div>
+            <div class="cluster space-between mt-1">
+              <div class="cluster muted"><span th:text="${@view.dateRange(tournament.startDate, tournament.endDate)}"></span><span th:text="${@view.timeControl(tournament.timeControlType)}"></span></div>
+              <a class="btn" th:href="@{/turnieje/{slug}(slug=${tournament.slug})}">Szczegóły</a>
+            </div>
+          </div>
+        </article>
+      </div>
+      <div class="empty" th:if="${#lists.isEmpty(tournaments)}">Nie ma jeszcze opublikowanych nadchodzących turniejów.</div>
+    </div>
+  </section>
+</main>
 </body>
 </html>

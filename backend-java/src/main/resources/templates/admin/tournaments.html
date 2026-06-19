@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Wszystkie turnieje')}"></head>
+<body><header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container"><header class="page-header"><p class="eyebrow">Panel administratora</p><h1>Wszystkie turnieje</h1></header>
+  <div class="stack"><article class="card card-body cluster space-between" th:each="tournament : ${tournaments}"><div><strong th:text="${tournament.title}"></strong><p class="muted mt-1" th:text="${tournament.city + ' · ' + @view.dateRange(tournament.startDate, tournament.endDate)}"></p></div><div class="cluster"><span class="badge" th:text="${@view.displayStatus(tournament.displayStatus)}"></span><a class="btn btn-small btn-outline" th:if="${tournament.status.name() != 'DRAFT' and tournament.status.name() != 'CANCELLED'}" th:href="@{/turnieje/{slug}(slug=${tournament.slug})}">Szczegóły</a><a class="btn btn-small btn-outline" th:href="@{/panel-sedziego/turnieje/{id}/edytuj(id=${tournament.id})}">Edytuj</a><a class="btn btn-small" th:href="@{/panel-sedziego/turnieje/{id}/zgloszenia(id=${tournament.id})}">Zgłoszenia</a></div></article></div>
+</div></main></body></html>

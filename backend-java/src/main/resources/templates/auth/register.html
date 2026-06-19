@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Rejestracja')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="auth-page">
+  <section class="card auth-card">
+    <div class="card-header"><h1 class="card-title">Rejestracja</h1><p class="card-subtitle">Nowe konto otrzyma rolę zawodnika.</p></div>
+    <div class="card-body">
+      <form class="stack" method="post" th:action="@{/rejestracja}" th:object="${registerForm}">
+        <div class="alert alert-error" th:if="${#fields.hasGlobalErrors()}" th:each="error : ${#fields.globalErrors()}" th:text="${error}"></div>
+        <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="email" th:field="*{email}"><span class="field-error" th:errors="*{email}"></span></div>
+        <div class="field"><label for="name">Imię i nazwisko</label><input id="name" autocomplete="name" th:field="*{name}"><span class="field-error" th:errors="*{name}"></span></div>
+        <div class="field"><label for="password">Hasło</label><input id="password" type="password" autocomplete="new-password" th:field="*{password}"><span class="field-error" th:errors="*{password}"></span></div>
+        <div class="field"><label for="confirmPassword">Powtórz hasło</label><input id="confirmPassword" type="password" autocomplete="new-password" th:field="*{confirmPassword}"><span class="field-error" th:errors="*{confirmPassword}"></span></div>
+        <button class="btn" type="submit">Utwórz konto</button>
+      </form>
+      <p class="text-center muted mt-2">Masz już konto? <a class="link" th:href="@{/logowanie}">Zaloguj się</a></p>
+    </div>
+  </section>
+</main>
+</body>
+</html>

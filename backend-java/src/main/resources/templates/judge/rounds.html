@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Rundy sędziowskie')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Panel sędziego</p><h1 th:text="${'Rundy: ' + tournament.title}"></h1><p class="lead">Turniej kołowy generuje wszystkie rundy przy starcie. Swiss generuje kolejną rundę po zakończeniu poprzedniej.</p></header>
+  <nav th:replace="~{fragments/layout :: management-nav(${tournament}, 'rounds')}"></nav>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <section class="card mb-2"><div class="card-header"><h2 class="card-title">Cykl turnieju</h2></div><div class="card-body stack">
+    <div class="cluster">
+      <form th:if="${tournament.status.name() == 'PUBLISHED' or tournament.status.name() == 'REGISTRATION_CLOSED'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/start(id=${tournament.id})}" data-confirm="Rozpocząć turniej?"><button class="btn btn-accent" type="submit">Rozpocznij turniej</button></form>
+      <form th:if="${tournament.tournamentType.name() == 'SWISS' and tournament.status.name() == 'IN_PROGRESS'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/rundy/swiss/nastepna(id=${tournament.id})}"><button class="btn" type="submit">Generuj kolejną rundę</button></form>
+      <form th:if="${tournament.status.name() == 'IN_PROGRESS'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/zakoncz(id=${tournament.id})}" data-confirm="Zakończyć turniej?"><button class="btn" type="submit" th:disabled="${!canFinishTournament}">Zakończ turniej</button></form>
+      <form th:if="${tournament.tournamentType.name() == 'SWISS' and tournament.status.name() == 'IN_PROGRESS'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/zakoncz-wczesniej(id=${tournament.id})}" data-confirm="Zakończyć turniej przed rozegraniem wszystkich rund?"><button class="btn btn-outline" type="submit" th:disabled="${!completedRoundExists}">Zakończ wcześniej</button></form>
+    </div>
+  </div></section>
+  <section class="card"><div class="card-header"><h2 class="card-title">Lista rund</h2></div><div class="card-body stack">
+    <a class="card card-body cluster space-between" th:each="round : ${rounds}" th:href="@{/panel-sedziego/turnieje/{id}/rundy/{number}(id=${tournament.id},number=${round.roundNumber})}">
+      <span><strong th:text="${'Runda ' + round.roundNumber}"></strong><span class="muted" th:text="${' · ' + round.games.size() + ' partii'}"></span></span><span class="badge" th:text="${@view.roundStatus(round.status)}"></span>
+    </a>
+    <div class="empty" th:if="${#lists.isEmpty(rounds)}">Nie utworzono jeszcze rund.</div>
+  </div></section>
+</div></main>
+</body></html>

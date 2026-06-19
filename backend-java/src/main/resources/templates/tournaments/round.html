@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Runda')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Turniej</p><h1 th:text="${'Runda ' + round.roundNumber + ': ' + tournament.title}"></h1><p class="lead">Kojarzenia i wyniki rundy.</p></header>
+  <th:block th:if="${managementView}">
+    <nav th:replace="~{fragments/layout :: management-nav(${tournament}, 'rounds')}"></nav>
+  </th:block>
+  <th:block th:unless="${managementView}">
+    <nav th:replace="~{fragments/layout :: public-nav(${tournament}, 'rounds')}"></nav>
+  </th:block>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <section class="card">
+    <div class="card-header cluster space-between">
+      <div><h2 class="card-title" th:text="${'Runda ' + round.roundNumber}"></h2><span class="badge" th:text="${@view.roundStatus(round.status)}"></span></div>
+      <form th:if="${editable and tournament.tournamentType.name() == 'SWISS' and round.status.name() != 'COMPLETED'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/rundy/{roundId}/zakoncz(id=${tournament.id},roundId=${round.id})}" data-confirm="Zakończyć tę rundę?">
+        <button class="btn btn-small" type="submit" th:disabled="${#lists.isEmpty(round.games) or #lists.contains(round.games.![result.name()], 'NOT_PLAYED')}">Zakończ rundę</button>
+      </form>
+    </div>
+    <div class="table-wrap" style="border:0;border-radius:0">
+      <table><thead><tr><th>Szach.</th><th>Białe</th><th>Wynik</th><th>Czarne</th><th th:if="${editable}">Akcje</th></tr></thead>
+      <tbody><tr th:each="game : ${round.games}">
+        <td th:text="${game.boardNumber}"></td>
+        <td><a class="link" th:if="${game.whiteRegistration}" th:href="@{/turnieje/{slug}/zawodnicy/{id}(slug=${tournament.slug},id=${game.whiteRegistration.id})}" th:text="${game.whiteRegistration.firstName + ' ' + game.whiteRegistration.lastName + ' (' + game.whiteRegistration.rating + ')'}"></a><span th:unless="${game.whiteRegistration}">Pauza</span></td>
+        <td><strong th:text="${@view.gameResult(game.result)}"></strong></td>
+        <td><a class="link" th:if="${game.blackRegistration}" th:href="@{/turnieje/{slug}/zawodnicy/{id}(slug=${tournament.slug},id=${game.blackRegistration.id})}" th:text="${game.blackRegistration.firstName + ' ' + game.blackRegistration.lastName + ' (' + game.blackRegistration.rating + ')'}"></a><span th:unless="${game.blackRegistration}">Pauza</span></td>
+        <td th:if="${editable}">
+          <form class="cluster" th:if="${(tournament.tournamentType.name() == 'ROUND_ROBIN' or round.status.name() != 'COMPLETED') and game.whiteRegistration != null and game.blackRegistration != null}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/partie/{gameId}/wynik(id=${tournament.id},gameId=${game.id})}">
+            <input type="hidden" name="roundNumber" th:value="${round.roundNumber}">
+            <select name="result"><option th:each="result : ${gameResults}" th:value="${result}" th:text="${@view.gameResult(result)}" th:selected="${result == game.result}"></option></select>
+            <button class="btn btn-small" type="submit">Zapisz</button>
+          </form>
+          <span class="muted" th:unless="${(tournament.tournamentType.name() == 'ROUND_ROBIN' or round.status.name() != 'COMPLETED') and game.whiteRegistration != null and game.blackRegistration != null}">Brak edycji</span>
+        </td>
+      </tr></tbody></table>
+    </div>
+  </section>
+</div></main>
+</body></html>

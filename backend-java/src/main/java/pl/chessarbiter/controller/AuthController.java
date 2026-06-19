@@ -1,66 +1,83 @@
 package pl.chessarbiter.controller;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import pl.chessarbiter.config.AppSecurityProperties;
-import pl.chessarbiter.dto.auth.*;
-import pl.chessarbiter.dto.common.MessageResponse;
-import pl.chessarbiter.entity.UserRole;
-import pl.chessarbiter.exception.NotFoundException;
-import pl.chessarbiter.repository.UserRepository;
+import pl.chessarbiter.dto.auth.AuthResponse;
+import pl.chessarbiter.dto.auth.LoginRequest;
+import pl.chessarbiter.dto.auth.RegisterRequest;
+import pl.chessarbiter.dto.auth.UserResponse;
+import pl.chessarbiter.entity.User;
 import pl.chessarbiter.security.CurrentUser;
+import pl.chessarbiter.security.JwtService;
 import pl.chessarbiter.service.AuthService;
 
 @RestController
-@RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@RequestMapping("/api/auth")
 public class AuthController {
+
     private final AuthService authService;
-    private final UserRepository userRepository;
-    private final AppSecurityProperties securityProps;
+    private final JwtService jwtService;
+    private final AppSecurityProperties securityProperties;
 
     @PostMapping("/register")
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletResponse response) {
-        AuthResponse res = authService.register(request);
-        var user = userRepository.findByEmailIgnoreCase(request.email()).orElseThrow();
-        setCookie(response, authService.generateToken(user));
-        return res;
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        User user = authService.register(request);
+        return authenticatedResponse(user);
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
-        AuthResponse res = authService.login(request);
-        var user = userRepository.findByEmailIgnoreCase(request.email()).orElseThrow();
-        setCookie(response, authService.generateToken(user));
-        return res;
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        User user = authService.login(request);
+        return authenticatedResponse(user);
     }
 
     @PostMapping("/logout")
-    public MessageResponse logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie(securityProps.getCookieName(), "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(securityProps.isCookieSecure());
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
-        return new MessageResponse("Logged out");
+    public ResponseEntity<Void> logout() {
+        return ResponseEntity.noContent()
+            .header(HttpHeaders.SET_COOKIE, expiredCookie().toString())
+            .build();
     }
 
     @GetMapping("/me")
     public UserResponse me() {
-        var user = CurrentUser.require();
-        return new UserResponse(user.getId(), user.getEmail(), user.getUsername(), UserRole.valueOf(user.getRole()));
+        User user = authService.currentUser(CurrentUser.require());
+        return UserResponse.from(user);
     }
 
-    private void setCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie(securityProps.getCookieName(), token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(securityProps.isCookieSecure());
-        cookie.setPath("/");
-        cookie.setMaxAge((int) securityProps.getJwtExpiration().getSeconds());
-        response.addCookie(cookie);
+    private ResponseEntity<AuthResponse> authenticatedResponse(User user) {
+        String token = jwtService.createToken(user);
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, sessionCookie(token).toString())
+            .body(new AuthResponse(UserResponse.from(user)));
+    }
+
+    private ResponseCookie sessionCookie(String token) {
+        return ResponseCookie.from(securityProperties.getCookieName(), token)
+            .httpOnly(true)
+            .secure(securityProperties.isCookieSecure())
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(securityProperties.getJwtExpiration())
+            .build();
+    }
+
+    private ResponseCookie expiredCookie() {
+        return ResponseCookie.from(securityProperties.getCookieName(), "")
+            .httpOnly(true)
+            .secure(securityProperties.isCookieSecure())
+            .sameSite("Lax")
+            .path("/")
+            .maxAge(0)
+            .build();
     }
 }

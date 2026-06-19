@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel administratora')}"></head>
+<body><header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container"><header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1>Panel administratora</h1></header>
+  <div class="grid grid-3 mb-2"><div class="card card-body"><span class="muted">Użytkownicy</span><h2 th:text="${stats.usersCount}"></h2></div><div class="card card-body"><span class="muted">Turnieje</span><h2 th:text="${stats.tournamentsCount}"></h2></div><div class="card card-body"><span class="muted">Zgłoszenia</span><h2 th:text="${stats.registrationsCount}"></h2></div></div>
+  <div class="cluster"><a class="btn" th:href="@{/panel-admina/uzytkownicy}">Użytkownicy</a><a class="btn btn-outline" th:href="@{/panel-admina/turnieje}">Wszystkie turnieje</a><a class="btn btn-outline" th:href="@{/panel-sedziego}">Panel sędziego</a></div>
+</div></main></body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Moje zgłoszenia')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1>Moje zgłoszenia</h1><p class="lead">Lista turniejów, do których jesteś zgłoszony.</p></header>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <div class="stack">
+    <article class="card" th:each="registration : ${registrations}" th:if="${registration.tournament != null}">
+      <div class="card-body">
+        <div class="cluster space-between">
+          <div><h2 th:text="${registration.tournament.title}"></h2><p class="muted" th:text="${registration.tournament.city + ', ' + registration.tournament.location}"></p></div>
+          <span class="badge" th:text="${@view.registrationStatus(registration.status)}"></span>
+        </div>
+        <div class="cluster space-between mt-1">
+          <div class="cluster muted"><span th:text="${@view.dateRange(registration.tournament.startDate, registration.tournament.endDate)}"></span><span th:text="${@view.tournamentType(registration.tournament.tournamentType)}"></span></div>
+          <div class="cluster">
+            <a class="btn btn-outline" th:href="@{/turnieje/{slug}(slug=${registration.tournament.slug})}">Turniej</a>
+            <form method="post" th:if="${(registration.status.name() == 'REGISTERED' or registration.status.name() == 'WAITLIST') and registration.tournament.displayStatus.name() != 'FINISHED'}" th:action="@{/moje-zgloszenia/{id}/anuluj(id=${registration.id})}" data-confirm="Anulować zgłoszenie?"><button class="btn btn-danger" type="submit">Anuluj zgłoszenie</button></form>
+            <span class="muted" th:if="${(registration.status.name() == 'REGISTERED' or registration.status.name() == 'WAITLIST') and registration.tournament.displayStatus.name() == 'FINISHED'}">Turniej jest zakończony. Zgłoszenia nie można już anulować.</span>
+          </div>
+        </div>
+      </div>
+    </article>
+    <div class="empty" th:if="${#lists.isEmpty(registrations)}">Nie masz jeszcze zgłoszeń.</div>
+  </div>
+</div></main>
+</body></html>

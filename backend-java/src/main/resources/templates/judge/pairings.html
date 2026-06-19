@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Kojarzenia')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Panel sędziego</p><h1 th:text="${'Kojarzenia: ' + tournament.title}"></h1><p class="lead">Uczestnicy, rundy i ręczne kojarzenia w jednym miejscu.</p></header>
+  <nav th:replace="~{fragments/layout :: management-nav(${tournament}, 'pairings')}"></nav>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <div class="alert alert-warning" th:if="${tournament.status.name() != 'IN_PROGRESS' and tournament.status.name() != 'FINISHED'}">Turniej jeszcze się nie rozpoczął. Kojarzenia będą dostępne po rozpoczęciu rundy.</div>
+  <div class="alert alert-success" th:if="${tournament.status.name() == 'FINISHED'}">Turniej jest zakończony. Poniżej pozostają dostępne utworzone kojarzenia i wyniki.</div>
+  <div class="grid grid-2">
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Uczestnicy</h2><p class="card-subtitle">Aktywne zgłoszenia oraz osoby dodane ręcznie.</p></div>
+      <div class="card-body stack">
+        <form class="form-grid" method="post" th:action="@{/panel-sedziego/turnieje/{id}/uczestnicy/recznie(id=${tournament.id})}">
+          <div class="field"><label>Imię</label><input name="firstName" required></div><div class="field"><label>Nazwisko</label><input name="lastName" required></div>
+          <div class="field"><label>Klub / miasto</label><input name="clubOrCity" required></div><div class="field"><label>Ranking</label><input type="number" name="rating" min="0" max="4000" required></div>
+          <div class="field"><label>Kategoria</label><input name="chessCategory"></div><div class="field"><label>Rok urodzenia</label><input type="number" name="birthYear"></div>
+          <div class="field-full"><button class="btn btn-outline" type="submit">Dodaj zawodnika ręcznie</button></div>
+        </form>
+        <div class="table-wrap" th:if="${!#lists.isEmpty(participants)}"><table><thead><tr><th>Nr</th><th>Zawodnik</th><th>Klub / miasto</th><th>Ranking</th></tr></thead><tbody><tr th:each="participant, iteration : ${participants}"><td th:text="${participant.startNumber ?: iteration.count}"></td><td th:text="${participant.firstName + ' ' + participant.lastName}"></td><td th:text="${participant.clubOrCity}"></td><td th:text="${participant.rating}"></td></tr></tbody></table></div>
+        <div class="empty" th:if="${#lists.isEmpty(participants)}">Brak aktywnych zawodników.</div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Dodaj kojarzenie ręcznie</h2></div>
+      <div class="card-body">
+        <form class="form-grid" th:if="${tournament.status.name() == 'IN_PROGRESS' and !#lists.isEmpty(participants)}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/kojarzenia/recznie(id=${tournament.id})}">
+          <div class="field"><label>Runda</label><input type="number" name="roundNumber" min="1" th:value="${nextRoundNumber}" required></div>
+          <div class="field"><label>Szachownica</label><input type="number" name="boardNumber" min="1" value="1" required></div>
+          <div class="field"><label>Białe</label><select name="whiteRegistrationId" required><option th:each="player : ${participants}" th:value="${player.id}" th:text="${player.firstName + ' ' + player.lastName}"></option></select></div>
+          <div class="field"><label>Czarne</label><select name="blackRegistrationId"><option value="">Pauza</option><option th:each="player : ${participants}" th:value="${player.id}" th:text="${player.firstName + ' ' + player.lastName}"></option></select></div>
+          <div class="field-full"><button class="btn" type="submit">Dodaj kojarzenie</button></div>
+        </form>
+        <div class="empty" th:unless="${tournament.status.name() == 'IN_PROGRESS' and !#lists.isEmpty(participants)}">Ręczne kojarzenia są dostępne tylko podczas trwania turnieju.</div>
+      </div>
+    </section>
+  </div>
+  <section class="card mt-2">
+    <div class="card-header cluster space-between"><h2 class="card-title">Rundy i kojarzenia</h2><form th:if="${tournament.tournamentType.name() == 'SWISS' and tournament.status.name() == 'IN_PROGRESS'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/rundy/swiss/nastepna(id=${tournament.id})}"><button class="btn btn-small" type="submit">Generuj rundę</button></form></div>
+    <div class="card-body stack">
+      <a class="card card-body cluster space-between" th:each="round : ${rounds}" th:href="@{/panel-sedziego/turnieje/{id}/rundy/{number}(id=${tournament.id},number=${round.roundNumber})}"><span th:text="${'Runda ' + round.roundNumber + ' · ' + round.games.size() + ' partii'}"></span><span class="badge" th:text="${@view.roundStatus(round.status)}"></span></a>
+      <div class="empty" th:if="${#lists.isEmpty(rounds)}">Nie utworzono jeszcze rund ani kojarzeń.</div>
+    </div>
+  </section>
+  <section class="card mt-2"><div class="card-header"><h2 class="card-title">Tabela</h2></div><div class="card-body" th:replace="~{fragments/tables :: standings(${standings}, null)}"></div></section>
+</div></main>
+</body></html>

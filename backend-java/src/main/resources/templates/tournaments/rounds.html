@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Rundy')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">Turniej</p><h1 th:text="${'Rundy: ' + tournament.title}"></h1></header>
+  <nav th:replace="~{fragments/layout :: public-nav(${tournament}, 'rounds')}"></nav>
+  <div class="stack">
+    <a class="card card-body cluster space-between" th:each="round : ${rounds}" th:href="@{/turnieje/{slug}/rundy/{number}(slug=${tournament.slug},number=${round.roundNumber})}">
+      <span><strong th:text="${'Runda ' + round.roundNumber}"></strong><span class="muted" th:text="${' · ' + round.games.size() + ' partii'}"></span></span>
+      <span class="badge" th:text="${@view.roundStatus(round.status)}"></span>
+    </a>
+    <div class="empty" th:if="${#lists.isEmpty(rounds)}">Nie utworzono jeszcze rund.</div>
+  </div>
+</div></main>
+</body></html>

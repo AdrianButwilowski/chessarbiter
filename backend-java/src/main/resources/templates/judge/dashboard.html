@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel sędziego')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page"><div class="container">
+  <header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1>Panel sędziego</h1><p class="lead">Zarządzaj turniejami, zgłoszeniami, rundami, kojarzeniami i wynikami.</p></header>
+  <div th:replace="~{fragments/layout :: messages}"></div>
+  <div class="cluster mb-2"><a class="btn" th:href="@{/panel-sedziego/turnieje/nowy}">Dodaj turniej</a><a class="btn btn-outline" th:if="${currentUser.role == 'ADMIN'}" th:href="@{/panel-admina}">Panel administratora</a></div>
+  <div class="grid grid-3 mb-2">
+    <div class="card card-body"><span class="muted">Moje turnieje</span><h2 th:text="${tournaments.size()}"></h2></div>
+    <div class="card card-body"><span class="muted">Aktywne zgłoszenia</span><h2 th:text="${activeRegistrations}"></h2></div>
+    <div class="card card-body"><span class="muted">Nadchodzące turnieje</span><h2 th:text="${upcomingCount}"></h2></div>
+  </div>
+  <section class="card"><div class="card-header"><h2 class="card-title">Turnieje</h2></div><div class="card-body stack">
+    <article class="card card-body" th:each="tournament : ${tournaments}">
+      <div class="cluster space-between">
+        <div><div class="cluster"><strong th:text="${tournament.title}"></strong><span class="badge" th:text="${@view.displayStatus(tournament.displayStatus)}"></span></div><p class="muted mt-1" th:text="${tournament.city + ' · ' + @view.dateRange(tournament.startDate, tournament.endDate) + ' · ' + tournament.activeRegistrationCount + ' aktywnych zgłoszeń'}"></p></div>
+        <div class="cluster">
+          <form th:if="${tournament.status.name() == 'DRAFT'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/status(id=${tournament.id})}"><input type="hidden" name="status" value="PUBLISHED"><button class="btn btn-small" type="submit">Opublikuj</button></form>
+          <form th:if="${tournament.status.name() == 'PUBLISHED'}" method="post" th:action="@{/panel-sedziego/turnieje/{id}/start(id=${tournament.id})}" data-confirm="Rozpocząć turniej i utworzyć pierwszą rundę?"><button class="btn btn-small btn-accent" type="submit">Rozpocznij</button></form>
+          <a class="btn btn-small btn-outline" th:href="@{/panel-sedziego/turnieje/{id}/edytuj(id=${tournament.id})}">Edytuj</a>
+          <a class="btn btn-small btn-outline" th:href="@{/panel-sedziego/turnieje/{id}/zgloszenia(id=${tournament.id})}">Zgłoszenia</a>
+          <a class="btn btn-small" th:href="@{/panel-sedziego/turnieje/{id}/rundy(id=${tournament.id})}">Rundy</a>
+        </div>
+      </div>
+    </article>
+    <div class="empty" th:if="${#lists.isEmpty(tournaments)}">Nie masz jeszcze turniejów.</div>
+  </div></section>
+</div></main>
+</body></html>

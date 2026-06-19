@@ -1,13 +1,56 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
 <head th:fragment="head(title)">
-    <meta charset="UTF-8">
-    <title th:text="${title}">ChessArbiter</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${title + ' | ChessArbiter Polska'}">ChessArbiter Polska</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <script defer th:src="@{/js/app.js}"></script>
 </head>
 <body>
-<header th:fragment="header">
-    <nav><a th:href="@{/}">Strona główna</a></nav>
+<header class="site-header" th:fragment="header">
+  <div class="container header-inner">
+    <a class="brand" th:href="@{/}">
+      <span class="brand-mark">♛</span>
+      <span>ChessArbiter Polska</span>
+    </a>
+    <nav class="nav">
+      <a th:href="@{/turnieje}">Turnieje</a>
+      <th:block th:if="${currentUser == null}">
+        <a th:href="@{/logowanie}">Logowanie</a>
+        <a th:href="@{/rejestracja}">Rejestracja</a>
+      </th:block>
+      <th:block th:if="${currentUser != null}">
+        <a th:if="${currentUser.role == 'ADMIN'}" th:href="@{/panel-admina}">Panel administratora</a>
+        <a th:if="${currentUser.role == 'ADMIN' or currentUser.role == 'ARBITER'}" th:href="@{/panel-sedziego}">Panel sędziego</a>
+        <a th:href="@{/profil}">Mój profil</a>
+        <a th:href="@{/moje-zgloszenia}">Moje zgłoszenia</a>
+        <form class="inline" method="post" th:action="@{/wyloguj}">
+          <button type="submit">Wyloguj</button>
+        </form>
+      </th:block>
+    </nav>
+  </div>
 </header>
+
+<div th:fragment="messages">
+  <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+  <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+</div>
+
+<nav class="tabs" th:fragment="public-nav(tournament, active)">
+  <a th:classappend="${active == 'info'} ? 'active'" th:href="@{/turnieje/{slug}(slug=${tournament.slug})}">Informacje</a>
+  <a th:classappend="${active == 'players'} ? 'active'" th:href="@{/turnieje/{slug}/lista-startowa(slug=${tournament.slug})}">Lista startowa</a>
+  <a th:classappend="${active == 'rounds'} ? 'active'" th:href="@{/turnieje/{slug}/rundy(slug=${tournament.slug})}">Rundy</a>
+  <a th:classappend="${active == 'results'} ? 'active'" th:href="@{/turnieje/{slug}/wyniki(slug=${tournament.slug})}">Wyniki</a>
+</nav>
+
+<nav class="tabs" th:fragment="management-nav(tournament, active)">
+  <a th:classappend="${active == 'edit'} ? 'active'" th:href="@{/panel-sedziego/turnieje/{id}/edytuj(id=${tournament.id})}">Edycja</a>
+  <a th:classappend="${active == 'registrations'} ? 'active'" th:href="@{/panel-sedziego/turnieje/{id}/zgloszenia(id=${tournament.id})}">Zgłoszenia</a>
+  <a th:classappend="${active == 'rounds'} ? 'active'" th:href="@{/panel-sedziego/turnieje/{id}/rundy(id=${tournament.id})}">Rundy</a>
+  <a th:classappend="${active == 'pairings'} ? 'active'" th:href="@{/panel-sedziego/turnieje/{id}/kojarzenia(id=${tournament.id})}">Kojarzenia</a>
+  <a th:classappend="${active == 'results'} ? 'active'" th:href="@{/panel-sedziego/turnieje/{id}/wyniki(id=${tournament.id})}">Wyniki</a>
+</nav>
 </body>
 </html>

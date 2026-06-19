@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Turnieje')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+<main class="page">
+  <div class="container">
+    <header class="page-header"><p class="eyebrow">ChessArbiter Polska</p><h1>Turnieje</h1><p class="lead">Znajdź turniej i zapisz się jako zawodnik.</p></header>
+    <form class="card card-body form-grid mb-2" method="get" th:action="@{/turnieje}">
+      <div class="field"><label for="q">Szukaj</label><input id="q" name="q" placeholder="Nazwa, miasto lub miejsce" th:value="${q}"></div>
+      <div class="field"><label for="filter">Status</label><select id="filter" name="filter">
+        <option value="all" th:selected="${filter == 'all'}">Wszystkie publiczne</option>
+        <option value="upcoming" th:selected="${filter == 'upcoming'}">Nadchodzące</option>
+        <option value="registration" th:selected="${filter == 'registration'}">Zapisy otwarte</option>
+        <option value="in-progress" th:selected="${filter == 'in-progress'}">W trakcie</option>
+        <option value="finished" th:selected="${filter == 'finished'}">Zakończone</option>
+        <option value="cancelled" th:selected="${filter == 'cancelled'}">Odwołane</option>
+      </select></div>
+      <div class="field"><label for="type">System</label><select id="type" name="type"><option value="">Każdy system</option><option th:each="type : ${tournamentTypes}" th:value="${type}" th:text="${@view.tournamentType(type)}" th:selected="${type == selectedType}"></option></select></div>
+      <div class="field"><label for="time">Tempo</label><select id="time" name="time"><option value="">Każde tempo</option><option th:each="time : ${timeControlTypes}" th:value="${time}" th:text="${@view.timeControl(time)}" th:selected="${time == selectedTime}"></option></select></div>
+      <div class="field field-full"><button class="btn" type="submit">Filtruj</button></div>
+    </form>
+    <div class="stack">
+      <article class="card" th:each="tournament : ${tournaments}">
+        <div class="card-body">
+          <div class="cluster space-between">
+            <div><h2 th:text="${tournament.title}"></h2><p class="muted" th:text="${tournament.city + ', ' + tournament.location}"></p></div>
+            <div class="cluster"><span class="badge" th:text="${@view.displayStatus(tournament.displayStatus)}"></span><span class="badge badge-success" th:if="${tournament.registrationOpen}">Zapisy otwarte</span><span class="badge badge-muted" th:unless="${tournament.registrationOpen}">Zapisy zamknięte</span></div>
+          </div>
+          <div class="cluster space-between mt-1">
+            <div class="cluster muted"><span th:text="${@view.dateRange(tournament.startDate, tournament.endDate)}"></span><span th:text="${@view.tournamentType(tournament.tournamentType)}"></span><span th:text="${@view.timeControl(tournament.timeControlType)}"></span></div>
+            <a class="btn" th:href="@{/turnieje/{slug}(slug=${tournament.slug})}">Szczegóły</a>
+          </div>
+        </div>
+      </article>
+      <div class="empty" th:if="${#lists.isEmpty(tournaments)}">Brak turniejów spełniających kryteria.</div>
+    </div>
+  </div>
+</main>
+</body>
+</html>
